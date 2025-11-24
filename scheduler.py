@@ -95,13 +95,22 @@ def run_notebook(notebook_path):
 
     return not execution_failed
 
+import argparse
+
 def main():
-    # List of notebooks to run in order
-    notebooks = [
-        "notebooks/test_nb_1.ipynb",
-        # "notebooks/fail_nb.ipynb",
-        "notebooks/test_nb_2.ipynb"
-    ]
+    parser = argparse.ArgumentParser(description="Schedule sequential execution of Jupyter Notebooks.")
+    parser.add_argument("notebooks", nargs="*", help="List of notebook paths to execute.")
+    args = parser.parse_args()
+
+    if args.notebooks:
+        notebooks = args.notebooks
+    else:
+        # Default list if no arguments provided
+        notebooks = [
+            "notebooks/test_nb_1.ipynb",
+            # "notebooks/fail_nb.ipynb",
+            "notebooks/test_nb_2.ipynb"
+        ]
     
     print("Starting sequential notebook scheduler...")
     print("----------------------------------------")

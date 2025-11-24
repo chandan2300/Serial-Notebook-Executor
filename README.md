@@ -25,8 +25,15 @@ A simple Python script to execute multiple Jupyter Notebooks sequentially. This 
     Put your `.ipynb` files in the `notebooks/` directory.
 
 3.  **Run the Scheduler**:
+    
+    **Option A: Run default list (defined in script)**
     ```bash
     python scheduler.py
+    ```
+
+    **Option B: Run specific notebooks**
+    ```bash
+    python scheduler.py notebooks/test_nb_1.ipynb notebooks/test_nb_2.ipynb
     ```
 
 ## Configuration
