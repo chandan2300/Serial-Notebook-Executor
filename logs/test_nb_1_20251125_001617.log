@@ -1,0 +1,6 @@
+2025-11-25 00:16:17,867 - INFO - Starting execution of notebooks/test_nb_1.ipynb...
+2025-11-25 00:16:17,867 - INFO - Logs are being saved to logs/test_nb_1_20251125_001617.log
+2025-11-25 00:16:18,516 - INFO - Executing cell 1...
+2025-11-25 00:16:20,641 - INFO - Successfully finished notebooks/test_nb_1.ipynb
+2025-11-25 00:16:20,641 - INFO - Kernel cleared and resources released.
+

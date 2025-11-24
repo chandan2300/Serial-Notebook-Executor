@@ -1,48 +1,84 @@
-import subprocess
-import time
+
 import os
 import sys
+import time
+import logging
+import nbformat
+from nbconvert.preprocessors import ExecutePreprocessor
+
+# Ensure logs directory exists
+LOG_DIR = "logs"
+if not os.path.exists(LOG_DIR):
+    os.makedirs(LOG_DIR)
+
+class LoggingExecutePreprocessor(ExecutePreprocessor):
+    def preprocess_cell(self, cell, resources, index):
+        logging.info(f"Executing cell {index + 1}...")
+        return super().preprocess_cell(cell, resources, index)
+
+def setup_logger(notebook_name):
+    """
+    Sets up a logger that writes to both console and a file.
+    """
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    
+    # Clear existing handlers to avoid duplicate logs
+    if logger.hasHandlers():
+        logger.handlers.clear()
+
+    # Console Handler
+    c_handler = logging.StreamHandler(sys.stdout)
+    c_handler.setFormatter(logging.Formatter('[%(asctime)s] %(message)s', datefmt='%H:%M:%S'))
+    logger.addHandler(c_handler)
+
+    # File Handler
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    log_file = os.path.join(LOG_DIR, f"{notebook_name}_{timestamp}.log")
+    f_handler = logging.FileHandler(log_file)
+    f_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    logger.addHandler(f_handler)
+    
+    return log_file
 
 def run_notebook(notebook_path):
     """
-    Runs a Jupyter notebook using nbconvert.
-    This creates a fresh kernel for the notebook, executes it, and then shuts it down.
+    Runs a Jupyter notebook using nbconvert Python API with cell-level logging.
     """
-    print(f"[{time.strftime('%H:%M:%S')}] Starting execution of {notebook_path}...")
+    notebook_name = os.path.splitext(os.path.basename(notebook_path))[0]
+    log_file = setup_logger(notebook_name)
+    
+    logging.info(f"Starting execution of {notebook_path}...")
+    logging.info(f"Logs are being saved to {log_file}")
     
     # Check if file exists
     if not os.path.exists(notebook_path):
-        print(f"Error: Notebook not found at {notebook_path}")
+        logging.error(f"Notebook not found at {notebook_path}")
         return False
 
     try:
-        # Construct the command
-        # --to notebook: keep it as a notebook
-        # --execute: execute the cells
-        # --inplace: overwrite the file with the output (useful to see results)
-        # --ExecutePreprocessor.timeout=-1: no timeout
-        command = [
-            "jupyter", "nbconvert",
-            "--to", "notebook",
-            "--execute",
-            "--inplace",
-            "--ExecutePreprocessor.timeout=-1",
-            notebook_path
-        ]
-        
-        # Run the command
-        result = subprocess.run(command, capture_output=True, text=True)
-        
-        if result.returncode == 0:
-            print(f"[{time.strftime('%H:%M:%S')}] Successfully finished {notebook_path}")
-            return True
-        else:
-            print(f"[{time.strftime('%H:%M:%S')}] Error running {notebook_path}:")
-            print(result.stderr)
-            return False
+        # Read the notebook
+        with open(notebook_path) as f:
+            nb = nbformat.read(f, as_version=4)
+
+        # Configure the preprocessor
+        # timeout=-1 means no timeout
+        ep = LoggingExecutePreprocessor(timeout=-1, kernel_name='python3')
+
+        # Execute the notebook
+        # resources={'metadata': {'path': 'notebooks/'}} helps find relative paths if needed
+        ep.preprocess(nb, {'metadata': {'path': os.path.dirname(notebook_path)}})
+
+        # Save the executed notebook (inplace)
+        with open(notebook_path, 'w', encoding='utf-8') as f:
+            nbformat.write(nb, f)
+            
+        logging.info(f"Successfully finished {notebook_path}")
+        return True
 
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        logging.error(f"Error running {notebook_path}:")
+        logging.error(str(e))
         return False
 
 def main():
@@ -52,10 +88,6 @@ def main():
         "notebooks/test_nb_2.ipynb"
     ]
     
-    # You can also scan the directory if needed:
-    # notebooks = [os.path.join("notebooks", f) for f in os.listdir('notebooks') if f.endswith('.ipynb')]
-    # notebooks.sort()
-
     print("Starting sequential notebook scheduler...")
     print("----------------------------------------")
 
@@ -65,12 +97,12 @@ def main():
             print("Stopping execution due to failure.")
             sys.exit(1)
         
-        # Optional: explicit garbage collection or wait if needed, 
-        # though the process termination handles resource release.
-        print("Kernel cleared and resources released.\n")
+        # Optional: explicit garbage collection or wait if needed
+        logging.info("Kernel cleared and resources released.\n")
 
     print("----------------------------------------")
     print("All notebooks executed successfully.")
 
 if __name__ == "__main__":
     main()
+
