@@ -4,7 +4,7 @@ import sys
 import time
 import logging
 import nbformat
-from nbconvert.preprocessors import ExecutePreprocessor
+from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
 
 # Ensure logs directory exists
 LOG_DIR = "logs"
@@ -56,6 +56,9 @@ def run_notebook(notebook_path):
         logging.error(f"Notebook not found at {notebook_path}")
         return False
 
+    nb = None
+    execution_failed = False
+
     try:
         # Read the notebook
         with open(notebook_path) as f:
@@ -68,23 +71,35 @@ def run_notebook(notebook_path):
         # Execute the notebook
         # resources={'metadata': {'path': 'notebooks/'}} helps find relative paths if needed
         ep.preprocess(nb, {'metadata': {'path': os.path.dirname(notebook_path)}})
-
-        # Save the executed notebook (inplace)
-        with open(notebook_path, 'w', encoding='utf-8') as f:
-            nbformat.write(nb, f)
-            
+        
         logging.info(f"Successfully finished {notebook_path}")
-        return True
 
-    except Exception as e:
-        logging.error(f"Error running {notebook_path}:")
+    except CellExecutionError as e:
+        logging.error(f"Error executing cell in {notebook_path}:")
         logging.error(str(e))
-        return False
+        execution_failed = True
+    except Exception as e:
+        logging.error(f"An error occurred while running {notebook_path}:")
+        logging.error(str(e))
+        execution_failed = True
+    
+    # Save the notebook regardless of success or failure (if it was read)
+    if nb:
+        try:
+            with open(notebook_path, 'w', encoding='utf-8') as f:
+                nbformat.write(nb, f)
+            logging.info(f"Notebook saved to {notebook_path}")
+        except Exception as e:
+            logging.error(f"Failed to save notebook {notebook_path}: {e}")
+            return False
+
+    return not execution_failed
 
 def main():
     # List of notebooks to run in order
     notebooks = [
         "notebooks/test_nb_1.ipynb",
+        # "notebooks/fail_nb.ipynb",
         "notebooks/test_nb_2.ipynb"
     ]
     

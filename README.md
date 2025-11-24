@@ -6,7 +6,12 @@ A simple Python script to execute multiple Jupyter Notebooks sequentially. This 
 
 - **Sequential Execution**: Runs notebooks one after another.
 - **Resource Isolation**: Each notebook runs in a fresh process, clearing the kernel and freeing GPU memory upon completion.
-- **Error Handling**: Stops execution if a notebook fails (configurable).
+- **Detailed Logging**: 
+    - Real-time cell-level progress in the console.
+    - Automatic log file generation in `logs/` for each run.
+- **Robust Error Handling**: 
+    - Stops execution if a notebook fails.
+    - **Saves the failed notebook** with the error traceback, allowing for easy debugging.
 
 ## Usage
 
