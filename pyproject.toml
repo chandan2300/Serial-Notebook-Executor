@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nb_scheduler"
+version = "0.1.0"
+description = "A tool to execute Jupyter Notebooks sequentially with resource isolation."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "jupyter",
+    "nbconvert",
+    "nbformat",
+]
+
+[project.scripts]
+nb-scheduler = "nb_scheduler.scheduler:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

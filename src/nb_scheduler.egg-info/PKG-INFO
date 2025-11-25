@@ -1,3 +1,16 @@
+Metadata-Version: 2.4
+Name: nb_scheduler
+Version: 0.1.0
+Summary: A tool to execute Jupyter Notebooks sequentially with resource isolation.
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+Requires-Dist: jupyter
+Requires-Dist: nbconvert
+Requires-Dist: nbformat
+
 # Jupyter Notebook Scheduler
 
 A simple Python script to execute multiple Jupyter Notebooks sequentially. This tool ensures that each notebook runs in a separate process, guaranteeing that GPU memory and other resources are fully released between runs.
@@ -14,36 +27,27 @@ A simple Python script to execute multiple Jupyter Notebooks sequentially. This 
     - Stops execution if a notebook fails.
     - **Saves the failed notebook** with the error traceback, allowing for easy debugging.
 
-## Installation
-
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/chandan2300/Serial-Notebook-Executor.git
-    cd Serial-Notebook-Executor
-    ```
-
-2.  **Install the package**:
-    ```bash
-    pip install .
-    ```
-
 ## Usage
 
-Once installed, you can use the `nb-scheduler` command from anywhere.
+1.  **Install Dependencies**:
+    Ensure you have `jupyter` and `nbconvert` installed.
+    ```bash
+    pip install jupyter nbconvert
+    ```
 
-1.  **Place Notebooks**:
-    Put your `.ipynb` files in a directory (e.g., `notebooks/`).
+2.  **Place Notebooks**:
+    Put your `.ipynb` files in the `notebooks/` directory.
 
-2.  **Run the Scheduler**:
+3.  **Run the Scheduler**:
     
     **Option A: Run default list (defined in script)**
     ```bash
-    nb-scheduler
+    python scheduler.py
     ```
 
     **Option B: Run specific notebooks**
     ```bash
-    nb-scheduler notebooks/test_nb_1.ipynb notebooks/test_nb_2.ipynb
+    python scheduler.py notebooks/test_nb_1.ipynb notebooks/test_nb_2.ipynb
     ```
 
 ## Configuration

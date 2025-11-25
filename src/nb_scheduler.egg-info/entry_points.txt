@@ -1,0 +1,2 @@
+[console_scripts]
+nb-scheduler = nb_scheduler.scheduler:main
