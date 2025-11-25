@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "nb_scheduler"
+name = "jupyter-serial-scheduler"
 version = "0.1.0"
 description = "A tool to execute Jupyter Notebooks sequentially with resource isolation."
 readme = "README.md"

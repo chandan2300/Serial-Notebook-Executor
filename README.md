@@ -16,13 +16,21 @@ A simple Python script to execute multiple Jupyter Notebooks sequentially. This 
 
 ## Installation
 
-1.  **Clone the repository**:
+**Option A: Install from PyPI (Recommended)**
+
+```bash
+pip install jupyter-serial-scheduler
+```
+
+**Option B: Install from Source**
+
+1.  Clone the repository:
     ```bash
     git clone https://github.com/chandan2300/Serial-Notebook-Executor.git
     cd Serial-Notebook-Executor
     ```
 
-2.  **Install the package**:
+2.  Install the package:
     ```bash
     pip install .
     ```
