@@ -14,11 +14,26 @@ if not os.path.exists(LOG_DIR):
 class LoggingExecutePreprocessor(ExecutePreprocessor):
     def preprocess_cell(self, cell, resources, index):
         logging.info(f"Executing cell {index + 1}...")
-        return super().preprocess_cell(cell, resources, index)
+        cell, resources = super().preprocess_cell(cell, resources, index)
+        
+        # Log cell outputs to file only
+        output_logger = logging.getLogger("cell_output")
+        if hasattr(cell, "outputs"):
+            for output in cell.outputs:
+                if output.output_type == "stream":
+                    output_logger.info(f"[Cell {index + 1} Output] {output.text.strip()}")
+                elif output.output_type == "execute_result" or output.output_type == "display_data":
+                    if "text/plain" in output.data:
+                        output_logger.info(f"[Cell {index + 1} Output] {output.data['text/plain'].strip()}")
+                elif output.output_type == "error":
+                    output_logger.error(f"[Cell {index + 1} Error] {output.evalue.strip()}")
+        
+        return cell, resources
 
 def setup_logger(notebook_name):
     """
     Sets up a logger that writes to both console and a file.
+    Returns the log file path and the file handler (for reuse).
     """
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
@@ -38,6 +53,14 @@ def setup_logger(notebook_name):
     f_handler = logging.FileHandler(log_file)
     f_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
     logger.addHandler(f_handler)
+    
+    # Setup separate logger for cell outputs (File only)
+    output_logger = logging.getLogger("cell_output")
+    output_logger.setLevel(logging.INFO)
+    output_logger.propagate = False # Do not show in console
+    if output_logger.hasHandlers():
+        output_logger.handlers.clear()
+    output_logger.addHandler(f_handler)
     
     return log_file
 
